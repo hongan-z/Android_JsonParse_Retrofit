@@ -20,6 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private TextView textView;
+    private JsonPlaceHolderApi jsonPlaceHolderApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,17 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        JsonPlaceHolderApi jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi.class);
+        //JsonPlaceHolderApi jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi.class);
+        jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi.class);
+
+        //getPoste();
+        getComments();
+
+
+    }
+    /*
+    private void getPoste()
+    {
         Call<List<Post>> call = jsonPlaceHolderApi.getPosts();
         call.enqueue(new Callback<List<Post>>() {
             @Override
@@ -67,6 +78,45 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
+    }
+
+    */
+
+    private void getComments()
+    {
+        Call<List<Comment>> call = jsonPlaceHolderApi.getComments();
+        call.enqueue(new Callback<List<Comment>>()
+        {
+            @Override
+            public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
+
+                if(!response.isSuccessful()){
+                textView.setText("Code" + response.code());
+                return;
+                }
+                List<Comment> comments = response.body();
+                for(Comment comment : comments){
+                    String content = "";
+                    content += "ID: " + comment.getId() + "\n";
+                    content += "Post ID" + comment.getPostId() + "\n";
+                    content += "Name: " + comment.getName() + "\n";
+                    content += "Email: " + comment.getEmail() + "\n";
+                    content += "Text:" +  comment.getBody() +  "\n\n";
+
+                    textView.append(content);
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<Comment>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Someting wrong with server '404' Not found or execute or json do not pass into ....single java obj.", Toast.LENGTH_SHORT).show();
+                textView.setText(t.getMessage());
+            }
+        });
     }
 }
 
